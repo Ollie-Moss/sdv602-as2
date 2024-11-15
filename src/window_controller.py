@@ -7,16 +7,16 @@ passing of events between them.
 class WindowController():
     def __init__(self, screens):
         self.screens = screens
-        self.currentWindow = self.screens[0]
-        self.location = self.currentWindow.window.current_location(True, True)
+        self.currentScreen = self.screens[0]
+        self.location = self.currentScreen.window.current_location(True, True)
     
     # Reads the windows and passes the event read to the correct DES object for handling
     # Handles closing states
     def start(self):
         while True:
-            self.update_all_screens()
+            self.notify_all_observers()
 
-            window, event, values = sg.read_all_windows()
+            window, event, values = self.currentScreen.read()
 
             if event == sg.WIN_CLOSED and window.metadata == "Settings":
                 event = "-CANCEL-SETTINGS-"
@@ -40,17 +40,18 @@ class WindowController():
     def getScreen(self, title):
         return list(filter(lambda screen: screen.title == title, self.screens))[0]
 
+    def setCurrentScreen(self, screen):
+        self.currentScreen = screen
+        self.notify_all_observers()
+
+    def setLocation(self, location):
+        self.location = location
+        self.notify_all_observers()
+
     # Updates all data on each DES
-    # Hides and shows each DES based on which one is the current window
-    # NOTE: Window should stay in the same place when navigating, but doesn't
-    def update_all_screens(self):
+    def notify_all_observers(self):
         for screen in self.screens:
             screen.update()
-            if screen == self.currentWindow:
-                screen.window.UnHide()
-            else:
-                screen.window.Hide()
-        self.currentWindow.window.move(self.location[0], self.location[1])
 
     # Changes window in the direction provided
     # Handles looping
@@ -58,13 +59,10 @@ class WindowController():
     #       But does not
     def changeWindow(self, forward):
         curIndex = self.screens.index(
-            self.currentWindow) + (1 if forward else -1)
+            self.currentScreen) + (1 if forward else -1)
 
         curIndex = 0 if curIndex > len(self.screens)-1 else curIndex
         curIndex = len(self.screens)-1 if curIndex < 0 else curIndex
         
-        self.location = self.currentWindow.window.current_location(True, True)
-
-        self.currentWindow = self.screens[curIndex]
-
-        self.update_all_screens()
+        self.setLocation(self.currentScreen.window.current_location())
+        self.setCurrentScreen(self.screens[curIndex])

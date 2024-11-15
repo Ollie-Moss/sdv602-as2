@@ -14,6 +14,7 @@ Features:
 """
 
 
+
 class DataExplorerScreen():
     def __init__(self, title, data, layout, settings):
         self.title = title
