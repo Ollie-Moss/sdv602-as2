@@ -18,6 +18,7 @@ class Screen:
     def render(self):
         if self.layout != []:
             self.window = sg.Window(self.title, self.layout)
+        self.show()
 
     def finalize(self):
         self.window.finalize()
@@ -39,6 +40,7 @@ class Screen:
     # Provides a dialog style popup
     # Blocks event loop, no other windows can be interacted with
     def open(self):
+        self.show()
         keep_going = True
         while keep_going:
             event, values = self.window.read()
@@ -46,6 +48,7 @@ class Screen:
 
             if event == sg.WIN_CLOSED or event == 'Exit':
                 keep_going = False
+
             if keep_going is None:
                 keep_going = True
         self.close()
@@ -58,7 +61,7 @@ class Screen:
             print(f"EVENT RECIEVED: {self.window.Title}")
             # Do thing
             for controller in self.controllers:
-                keep_going = controller(event)
+                keep_going = controller(event, values)
                 if keep_going != None:
                     return keep_going
 

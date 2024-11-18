@@ -16,12 +16,14 @@ class DESManager():
     def setup_DESs(self):
         self.DESs.append(DES(self, "DES 1"))
         self.DESs.append(DES(self, "DES 2"))
+        self.DESs.append(DES(self, "DES 3"))
         self.currentDES = self.DESs[0]
 
         for des in self.DESs:
             des.create_layout()
             des.render()
             des.show()
+            des.start_update_thread()
 
     # Reads the windows and passes the event read to the correct DES object for handling
     # Handles closing states
@@ -32,12 +34,10 @@ class DESManager():
                 for des in self.DESs:
                     des.finalize()
                 window, event, values = sg.read_all_windows()
-                des = list(filter(lambda des: des.window.Title == window.Title, self.DESs))[0]
+                self.currentDES = list(filter(lambda des: des.window.Title == window.Title, self.DESs))[0]
             else:
                 event, values = self.currentDES.window.read()
 
-            if event == '-CHAT-':
-                self.showAll()
             if event == sg.WIN_CLOSED or event == 'Exit':
                 break
 
