@@ -16,9 +16,6 @@ if __name__ == '__main__':
 
     UserManager.multi = args.multi
 
-    # winMan = DESManager(UserManager.multi)
-    # winMan.setup_DESs()
-    # winMan.start()
     login = Login("Login")
     login.create_layout()
     login.render()

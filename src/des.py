@@ -6,7 +6,7 @@ from datetime import datetime
 import PySimpleGUI as sg
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 matplotlib.use('TkAgg')
 
 
@@ -16,11 +16,12 @@ class DES(Screen):
         self.controller = controller
 
         # Creates a placeholder line plot
-        plt.plot([-1, -4.5, 16, 23])
         self.figure = plt.gcf()
         self.figure_agg = None
 
     def draw_figure(self):
+
+        self.figure = plt.gcf()
         figure_canvas_agg = FigureCanvasTkAgg(
             self.figure, self.window["-GRAPH-"].TKCanvas)
         figure_canvas_agg.draw()
@@ -48,10 +49,16 @@ class DES(Screen):
             time.sleep(1)
 
     # Updates all elements, including graph
-    def update(self):
+    def update_figure(self):
         if self.figure_agg:
             # ** IMPORTANT ** Clean up previous drawing before drawing again
             self.delete_figure_agg()
+
+        if UserManager.current_data_source is not None:
+            data = UserManager.current_data_source
+            plt.plot(data.datetime, data.temp)
+        else:
+            plt.plot([])
         self.figure_agg = self.draw_figure()  # draw the figure
 
     def create_layout(self):
@@ -65,10 +72,11 @@ class DES(Screen):
 
         # Extra options such as zooming and navigation
         sideButtons = [[sg.Text("Zoom")], [sg.Button('+', key="-ZOOM-IN-"), sg.Button('-', key="-ZOOM-OUT-")], [sg.Button('Settings', key="-SETTINGS-")],
-                       [sg.Text("Navigation")], [sg.Button("<", key="-NAVIGATE-BACK-"), sg.Button(">", key="-NAVIGATE-FORWARD-")]]
+                       [sg.Text("Navigation")], [sg.Button("<", key="-NAVIGATE-BACK-"), sg.Button(">", key="-NAVIGATE-FORWARD-")], [sg.Button("Open CSV", key="-OPEN-")]]
         self.controllers.append(self.send_chat)
         self.controllers.append(self.navigate)
         self.controllers.append(self.open_settings)
+        self.controllers.append(self.open_csv)
 
         # Combines all the previous layouts and adds the area for the graph to the layout
         # This is the final layout the data explorer screen uses
@@ -77,6 +85,12 @@ class DES(Screen):
                         sg.Column(layout=sideButtons)],
                        [sg.Column(layout=chat), sg.Column(layout=details)],
                        [sg.Button('Exit')]]
+    def open_csv(self, event, values):
+        if event == '-OPEN-':
+            file_name = sg.PopupGetFile('Please select file to open', file_types=(("Comma separated value", "*.csv"),)) 
+            if file_name != None :
+                UserManager.instance.update_data_source(file_name)
+                self.update_figure()
 
     def send_chat(self, event, values):
         if event == '-SEND-':

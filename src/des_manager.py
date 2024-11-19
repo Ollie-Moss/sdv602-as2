@@ -23,13 +23,16 @@ class DESManager():
             des.create_layout()
             des.render()
             des.show()
-            des.start_update_thread()
 
     # Reads the windows and passes the event read to the correct DES object for handling
     # Handles closing states
     def start(self):
         while True:
             des = self.currentDES
+            if self.currentDES.finalized:
+                des.update_figure()
+                des.start_update_thread()
+
             if self.multiWindow:
                 for des in self.DESs:
                     des.finalize()
@@ -57,6 +60,7 @@ class DESManager():
                 des.hide()
             else:
                 des.show()
+                des.update_figure()
 
 
 if __name__ == '__main__':

@@ -1,13 +1,16 @@
 from jsn_drop_service import jsnDrop
+import os.path
 from datetime import datetime
 from uuid import uuid4
 from hashlib import sha256
+import pandas as pd
 
 
 class UserManager:
     instance = None
     current_user = None
     jsn_tok = "46a30b6c-586f-43eb-aeb5-079986f6b359"
+    current_data_source = None
 
     def __init__(self):
         self.jsnDrop = jsnDrop(UserManager.jsn_tok,
@@ -61,12 +64,14 @@ class UserManager:
                 return result
         return []
 
+    def update_data_source(self, filename):
+        if os.path.isfile(filename):
+            cols = ["name", "datetime", "tempmax", "tempmin", "temp", "precip", "humidity", "snow"]
+            datafile = pd.read_csv(filename, nrows=7, usecols=cols)
+            UserManager.current_data_source = datafile
+
 
 if __name__ == "__main__":
     UserManager()
 
-    result = UserManager.instance.signup("ollie", "ollie")
-    result = UserManager.instance.login("ollie", "ollie")
-
-    UserManager.instance.send_chat("HI", "DES 1")
-    UserManager.instance.get_chats("DES 1")
+    UserManager.instance.update_data_source("/mnt/c/Users/Ollie/Documents/Nelson, NSN, NZ 2023.csv")
