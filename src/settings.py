@@ -27,3 +27,6 @@ class Settings(Screen):
                                                         ]) ],
                     [sg.Push(), sg.Button("Save", key="-SAVE-SETTINGS-"), sg.Button("Cancel", key="Exit")]
                     ]
+        
+    def save(self, event, values):
+        pass

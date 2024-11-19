@@ -8,6 +8,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 matplotlib.use('TkAgg')
+import tkinter as tk
 
 
 class DES(Screen):
@@ -15,13 +16,14 @@ class DES(Screen):
         super().__init__(title)
         self.controller = controller
 
+        self.start_date = None
+        self.end_date = None
+
         # Creates a placeholder line plot
         self.figure = plt.gcf()
         self.figure_agg = None
 
     def draw_figure(self):
-
-        self.figure = plt.gcf()
         figure_canvas_agg = FigureCanvasTkAgg(
             self.figure, self.window["-GRAPH-"].TKCanvas)
         figure_canvas_agg.draw()
@@ -54,12 +56,14 @@ class DES(Screen):
             # ** IMPORTANT ** Clean up previous drawing before drawing again
             self.delete_figure_agg()
 
-        if UserManager.current_data_source is not None:
-            data = UserManager.current_data_source
-            plt.plot(data.datetime, data.temp)
+        if self.window.Title in UserManager.current_data_source.keys() and UserManager.current_data_source[self.window.Title] is not None:
+            data = UserManager.current_data_source[self.window.Title]
+            figure = plt.plot(data.datetime, data.temp)
+            # draw the figure
+            self.figure_agg = self.draw_figure()  
         else:
-            plt.plot([])
-        self.figure_agg = self.draw_figure()  # draw the figure
+            self.window['-GRAPH-'].TKCanvas.create_text(300, 200, text='No data source selected')
+
 
     def create_layout(self):
         # Create the layout for the chat section of a data explorer screen
@@ -81,7 +85,7 @@ class DES(Screen):
         # Combines all the previous layouts and adds the area for the graph to the layout
         # This is the final layout the data explorer screen uses
         self.layout = [[sg.Text('Title', key="title")],
-                       [sg.Canvas(size=(600, 400), key="-GRAPH-"),
+                       [sg.Canvas(size=(600, 400), key="-GRAPH-", expand_x=True, expand_y=True),
                         sg.Column(layout=sideButtons)],
                        [sg.Column(layout=chat), sg.Column(layout=details)],
                        [sg.Button('Exit')]]
@@ -89,7 +93,7 @@ class DES(Screen):
         if event == '-OPEN-':
             file_name = sg.PopupGetFile('Please select file to open', file_types=(("Comma separated value", "*.csv"),)) 
             if file_name != None :
-                UserManager.instance.update_data_source(file_name)
+                UserManager.instance.update_data_source(file_name, self.window.Title)
                 self.update_figure()
 
     def send_chat(self, event, values):

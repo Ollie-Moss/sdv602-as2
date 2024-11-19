@@ -22,20 +22,26 @@ class DESManager():
         for des in self.DESs:
             des.create_layout()
             des.render()
-            des.show()
 
     # Reads the windows and passes the event read to the correct DES object for handling
     # Handles closing states
     def start(self):
-        while True:
-            des = self.currentDES
-            if self.currentDES.finalized:
+        if self.multiWindow:
+            for des in self.DESs:
+                des.show()
+                des.finalize()
                 des.update_figure()
                 des.start_update_thread()
-
+        else:
+            self.currentDES.show()
+            self.currentDES.finalize()
+            self.currentDES.update_figure()
+            self.currentDES.start_update_thread()
+        while True:
             if self.multiWindow:
                 for des in self.DESs:
                     des.finalize()
+                    des.start_update_thread()
                 window, event, values = sg.read_all_windows()
                 self.currentDES = list(filter(lambda des: des.window.Title == window.Title, self.DESs))[0]
             else:
@@ -44,7 +50,8 @@ class DESManager():
             if event == sg.WIN_CLOSED or event == 'Exit':
                 break
 
-            des.accept_input(event, values)
+            self.currentDES.accept_input(event, values)
+            self.currentDES.window.TKroot.update()
 
     def changeDES(self, forward):
         curIndex = self.DESs.index(
@@ -60,6 +67,7 @@ class DESManager():
                 des.hide()
             else:
                 des.show()
+                des.finalize()
                 des.update_figure()
 
 

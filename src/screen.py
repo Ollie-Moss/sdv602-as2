@@ -17,7 +17,7 @@ class Screen:
 
     def render(self):
         if self.layout != []:
-            self.window = sg.Window(self.title, self.layout)
+            self.window = sg.Window(self.title, self.layout, resizable=True)
         self.show()
 
     def finalize(self):

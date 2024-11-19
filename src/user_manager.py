@@ -10,7 +10,7 @@ class UserManager:
     instance = None
     current_user = None
     jsn_tok = "46a30b6c-586f-43eb-aeb5-079986f6b359"
-    current_data_source = None
+    current_data_source = {} 
 
     def __init__(self):
         self.jsnDrop = jsnDrop(UserManager.jsn_tok,
@@ -64,11 +64,14 @@ class UserManager:
                 return result
         return []
 
-    def update_data_source(self, filename):
+    def update_data_source(self, filename, desTitle):
         if os.path.isfile(filename):
             cols = ["name", "datetime", "tempmax", "tempmin", "temp", "precip", "humidity", "snow"]
-            datafile = pd.read_csv(filename, nrows=7, usecols=cols)
-            UserManager.current_data_source = datafile
+            df = pd.read_csv(filename, nrows=7, usecols=cols)
+            # df['datetime'] = pd.to_datetime(df['datetime'])
+            # mask = (df['date'] > start_date) & (df['date'] <= end_date)
+            # print(df.loc(mask))
+            UserManager.current_data_source[desTitle] = df
 
 
 if __name__ == "__main__":

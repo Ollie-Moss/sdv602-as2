@@ -3,9 +3,15 @@ from auth import Login, Register
 from settings import Settings
 from user_manager import UserManager
 import argparse
+import PySimpleGUI as sg
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+matplotlib.use('TkAgg')
 
 
 if __name__ == '__main__':
+    sg.set_options(dpi_awareness=True, scaling=plt.gcf().dpi/72)
     # Creates instance of user manager
     UserManager()
     parser = argparse.ArgumentParser()
